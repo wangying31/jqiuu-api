@@ -151,4 +151,17 @@ exports.userInfo = function (req,res) {
 	});
 };
 
+exports.userSet = function (req,res) {
+	var id = req.user.id;
+	User.findByIdAsync(id).then(function (user) {
+		var own = true;
+		return res.status(200).send({
+			own: own,
+			userInfo: user.userInfo
+		});
+	}).catch(function (err) {
+		return res.status(401).send();
+	});
+};
+
 
