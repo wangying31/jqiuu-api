@@ -205,4 +205,29 @@ exports.updateUser = function (req, res) {
 	})
 };
 
+exports.updatePassword = function (req,res) {
+	var id = req.user.id;
+	var errorMsg;
 
+	var password = req.body.password;
+	var passwordRepeat = req.body.passwordRepeat;
+	if (password.length <= 5 || password.length > 15) {
+		errorMsg = "密码不合法";
+	} else if (password !== passwordRepeat) {
+		errorMsg = "两次输入的密码不一致";
+	}
+	if (errorMsg) {
+		return res.status(401).send({errorMsg: errorMsg});
+	}
+
+	User.findByIdAsync(id).then(function (user) {
+		user.password = password;
+		return user.saveAsync()
+	}).then(function () {
+		return res.status(200).send({
+			success: 'true'
+		});
+	}).catch(function (err) {
+		return res.status(401).send(err);
+	});
+};
