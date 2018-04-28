@@ -120,4 +120,35 @@ exports.header = function (req,res) {
 	});
 };
 
+exports.userInfo = function (req,res) {
+	var uid = req.params.id;
+	var id;
+	var data;
+	var own = false;
+	if (req.user) {
+		id = req.user.id;
+	}
+	User.findById(uid)
+		.populate('friend','nickname header')
+		.exec()
+		.then(function (user) {
+		data = user.toObject();
+		data.userInfo.friend = user.friend;
+		if (id == data._id) own = true;
+		return Article.count({authId: data._id})
+	}).then(function (articleCount) {
+		data.userInfo.articleCount = articleCount;
+		data.userInfo.collectCount = data.collectList.length;
+		return Album.countAsync({userId: data._id})
+	}).then(function (photoCount) {
+		data.userInfo.photoCount = photoCount;
+		return res.status(200).send({
+			own: own,
+			userInfo: data.userInfo
+		});
+	}).catch(function (err) {
+		return res.status(401).send();
+	});
+};
+
 
