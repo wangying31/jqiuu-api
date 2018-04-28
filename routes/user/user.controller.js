@@ -77,4 +77,47 @@ exports.authInfo = function (req,res) {
 	});
 };
 
+exports.header = function (req,res) {
+	var form = new formidable.IncomingForm();
+	form.keepExtensions = true;
+	form.uploadDir = __dirname + '/../../public/uploads/head/';
+	form.parse(req, function (err, fields, files) {
+		if (err) {
+			throw err;
+		}
+
+		var img = files.img;
+		var path = img.path;
+		var type = img.type.split('/')[0];
+		if(img.size > 1024*1024) {
+			fs.unlink(path, function () {
+				return res.send({"error":0});
+			});
+		}else if(type != 'image' && type != 'application'){
+			fs.unlink(path, function() {
+				return res.send({"error":0});
+			});
+		}else{
+			var urlPath = path.replace(/\\/g, '/');
+			var url = config.root + '/public/uploads/head' + urlPath.substr(urlPath.lastIndexOf('/'), urlPath.length);
+			var info = {
+				"error": 0,
+				"url" :url
+			};
+			
+			var id = req.user.id;
+			User.findByIdAsync(id).then(function (user) {
+				user.header = url;
+				return user.saveAsync()
+			}).then(function () {
+				return res.status(200).send({
+					"url" :url
+				});
+			}).catch(function (err) {
+				return res.status(401).send(err);
+			});
+		}
+	});
+};
+
 
