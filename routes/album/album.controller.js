@@ -75,3 +75,66 @@ exports.photoList = function (req, res) {
 		 return res.status(401).send();
 	 });
 };
+
+exports.photoUser = function (req, res) {  
+	var id;
+	if (req.user) {
+		id = req.user.id;
+	}
+	var uid = req.params.id;
+	var time = parseInt(req.params.date);
+	var date = new Date(time);
+	var own = id == uid?1:0;
+	if(id == uid) own = true;
+	var condition = {
+		userId: {$eq: uid},
+		created: {$lt: date }
+	};
+	var photoUserList = function (photo) {
+		var photosList = [];
+		for(var i=0;i<photo.length;i++) {
+			var date = getDate(photo[i].created);
+			var index = _.findIndex(photosList, {'date': date});
+
+			if (index !== -1) {
+				photosList[index].list.push(photo[i])
+			} else {
+				photosList[photosList.length] = {
+					date: date,
+					list: [photo[i]]
+				}
+			}
+		}
+		return photosList;
+	};
+	var getDate = function (value) {
+		var date = new Date(value);
+		return date.getFullYear() + "年" + (date.getMonth() + 1) + "月" + date.getDate() + "日"
+	};
+	Album.findAsync(condition, 'photo thumbnail created likeCount', {
+		sort: {created: -1},
+		limit: 20
+	}).then(function (photos) {
+		var photosList = photoUserList(photos);
+
+		return res.status(200).send({
+			own: own,
+			photo: photosList
+		})
+	}).catch(function (err) {
+		return res.status(401).send();
+	});
+};
+
+exports.delPhoto = function (req, res) {  
+	var id = req.user.id;
+	var pid = req.params.id;
+	Album.findByIdAsync(pid).then(function (photo) {
+		if (photo.userId != id) throw new Error();
+		return Album.findByIdAndRemoveAsync(pid)
+	}).then(function (photo) {
+		return res.status(200).send({photo: photo});
+	}).catch(function (err) {
+		return res.status(401).send(err);
+	});
+};
