@@ -55,5 +55,23 @@ exports.addPhoto = function (req, res) {
 };
 
 exports.photoList = function (req, res) {  
-
+	var time = parseInt(req.params.date);
+	var date = new Date(time);
+	var condition = {
+		status: {$gt: 0},
+		created: {$lt: date}
+	};
+	Album.find(condition
+	, 'userId photo thumbnail created likeCount', {
+		sort: {created: -1},
+		limit: 20
+	}).populate('userId', 'nickname')
+	.exec()
+	.then(function (photo) { 
+		return res.status(200).send({
+			photo: photo
+		})
+	 }).catch(function (err) {  
+		 return res.status(401).send();
+	 });
 };
