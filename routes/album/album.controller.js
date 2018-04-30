@@ -138,3 +138,36 @@ exports.delPhoto = function (req, res) {
 		return res.status(401).send(err);
 	});
 };
+
+exports.photoLike = function (req, res) {  
+	var pid = req.params.id;
+	var ip = req.ip;
+	var getToday = function (value) {
+		var date = new Date(value);
+		var dateToday = new Date();
+		return date.getFullYear() === dateToday.getFullYear && date.getMonth() === dateToday.getMonth() && date.getDate() === dateToday.getDate();
+	};
+	Album.findByIdAsync(pid).then(function (photo) {  
+		var isLiked = _.findIndex(photo.likeToday, {userIp: ip});
+		if(isLiked !== -1 && getToday(photo.likeToady[isLiked].date)) {
+			throw new Error();
+		}else if(isLiked !== -1){
+			photo.likeCount += 1;
+			photo.likeToady[isLiked].date = new Date();
+		}else{
+			photo.likeCount += 1;
+			photo.likeToady.push({
+				userIp: ip,
+				date: new Date()
+			})
+		}
+		return photo.saveAsync();
+	}).then(function (photo) {
+		return res.status(200).send({
+			pid: photo._id,
+			likeCount: photo.likeCount
+		});
+	}).catch(function (err) {
+		return res.status(401).send({errorMsg: '今天已经点过赞啦'});
+	});
+}
