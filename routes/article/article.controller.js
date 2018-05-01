@@ -98,4 +98,80 @@ exports.upload = function (req, res) {
   });
 };
 
+exports.tags = function(req, res){
+  Article.distinctAsync('tag').then(function (tags) {  
+    return res.status(200).send({
+      tags: tags
+    });
+  }).catch(function (err) {  
+    return res.status(401).send();
+  });
+};
 
+exports.articlePage = function (req, res) {  
+  var id;
+  if (req.user) {
+    id = req.user.id;
+  };
+  var aid = req.params.id;
+  var articlePage,own;
+  Article.findById(aid)
+    .populate('authId','nickname header summary')
+    .exec()
+    .then(function (article) {
+      articlePage = article;
+      var num = id == article.authId._id?0:1;
+      own = !num;
+      return Article.findByIdAndUpdate(aid, {$inc: {pv: num}});
+  }).then(function () {
+    return User.findByIdAsync(id)
+  }).then(function (user) {
+    var collected = false;
+    if(user) {
+      var isCollect = _.findIndex(user.collectList, function (item) {
+        return item.toString() == aid;
+      });
+      if(isCollect !== -1) collected = true;
+    }
+    return res.status(200).send({
+      article: articlePage,
+      collected: collected,
+      own: own
+    })
+  }).catch(function (err) {
+    return res.status(401).send();
+  });
+};
+
+exports.articleList = function (req, res) {
+  var time = parseInt(req.params.date);
+  var tag = req.query.tag;
+  var search = req.query.search;
+  search = new RegExp(search,"i");
+  var date = new Date(time);
+  var condition = {
+    status: {$gt: 0},
+    created: {$lt: date }
+  };
+  if(tag) condition.tag = {$eq: tag};
+  if(search) condition.title = search;
+  Article.find(condition,'authId title content image tag created commentCount pv', {
+    sort: {created: -1},
+    limit: 10
+  }).populate('authId','nickname')
+    .exec()
+    .then(function (article) {
+    var strLen = 200;
+    for(var i=0;i<article.length;i++) {
+      article[i].content = article[i].content.replace(/<\/?[^>]*>/g,'');
+      if(article[i].content.length>strLen) {
+        article[i].content = article[i].content.substring(0, strLen) + "  ...";
+      }
+    }
+    return res.status(200).send({
+      article: article
+    })
+  }).catch(function (err) {
+    return res.status(401).send();
+  });
+};
