@@ -175,3 +175,35 @@ exports.articleList = function (req, res) {
     return res.status(401).send();
   });
 };
+
+exports.articleUser = function (req, res) {
+  var uid = req.params.id;
+  var id;
+  if(req.user) id = req.user.id;
+  var time = parseInt(req.params.date);
+  var date = new Date(time);
+  var condition = {
+    authId: {$eq: uid},
+    created: {$lt: date }
+  };
+  if(uid !== id) condition.status = {$gt: 0};
+  Article.find(condition,'authId title content image tag created commentCount pv', {
+    sort: {created: -1},
+    limit: 10
+  }).populate('authId','nickname')
+    .exec()
+    .then(function (article) {
+      var strLen = 200;
+      for(var i=0;i<article.length;i++) {
+        article[i].content = article[i].content.replace(/<\/?[^>]*>/g,'');
+        if(article[i].content.length>strLen) {
+          article[i].content = article[i].content.substring(0, strLen) + "  ...";
+        }
+      }
+    return res.status(200).send({
+          article: article
+      })
+    }).catch(function (err) {
+      return res.status(401).send();
+  });
+};
