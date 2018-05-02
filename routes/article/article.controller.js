@@ -273,4 +273,81 @@ exports.articleCollect = function (req, res) {
   });
 };
 
+exports.editArticle = function (req,res) {
+  var aid = req.params.id;
+  var id = req.user.id;
+  var title = req.body.title;
+  var content = req.body.content;
+  var weather = req.body.weather;
+  var image = req.body.image;
+  var errorMsg;
+  if(title) title = title.trim();
+  if(weather) weather = weather.trim();
+  if(title && title.length > 10){
+    errorMsg = '标题过长';
+  }else if(!content){
+    errorMsg = '内容不能为空';
+  }else if(weather && weather.length > 5){
+    errorMsg = '天气过长';
+  }
+  if(errorMsg){
+    return res.status(401).send({errorMsg: errorMsg});
+  }
 
+  if(image && (image.substr(0, config.root.length) == config.root)) {
+    req.body.image = config.root + '/public/uploads/thumbnail' + image.substr(image.lastIndexOf('/'), image.length);
+  }else{
+    req.body.image = undefined;
+  }
+  Article.findByIdAsync(aid).then(function (article) {
+    if(id != article.authId){
+      throw new Error();
+    }
+    _.assign(article, req.body);
+    article.updated = new Date();
+    return article.saveAsync()
+  }).then(function (article) {
+    return res.status(200).send({
+      article: article
+    })
+  }).catch(function (err) {
+    return res.status(401).send();
+  })
+};
+
+exports.articleStatus = function (req, res) {  
+  var aid = req.params.id;
+  var id = req.user.id;
+  Article.findByIdAsync(aid).then(function (article) {  
+    if (id !== article.authId) {
+      throw new Error();
+    }
+    if (article.status === 0) {
+      article.status = 1;
+    } else if (article.status === 1) {
+      article.status = 0;
+    }
+    return article.saveAsync();
+  }).then(function (article) {
+    return res.status(200).send({
+      articleStatus: article.status
+    })
+  }).catch(function (err) {
+    return res.status(401).send();
+  });
+};
+
+exports.delArticle = function (req, res) {  
+  var id = req.user.id;
+  var aid = req.params.id;
+  Article.findByIdAsync(aid).then(function (article) {  
+    if (article.authId !== id) throw new Error();
+    return Article.findByIdAndRemoveAsync(aid);
+  }).then(function () {  
+    return Comment.removeAsync({aid: aid});
+  }).then(function () {  
+    return res.status(200).send({success: true});
+  }).catch(function (err) {  
+    return res.status(401).send();
+  });
+};
