@@ -19,7 +19,7 @@ var articleSchema = new Schema({
 	pv: { type:Number, default:0 }
 });
 
-var Article = mongoose.model("Aricle", articleSchema);
+var Article = mongoose.model("Article", articleSchema);
 var Promise = require('bluebird');
 Promise.promisifyAll(Article);
 Promise.promisifyAll(Article.prototype);

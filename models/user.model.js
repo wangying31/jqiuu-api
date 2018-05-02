@@ -48,7 +48,7 @@ var userSchema = new Schema({
 userSchema.virtual('password').set(function (password) { 
   this._password = password;
   this.salt = this.makeSalt();
-  thi.hashedPassword = this.encryptPassword(password);
+  this.hashedPassword = this.encryptPassword(password);
  }).get(function () { 
    return this._password;
 });

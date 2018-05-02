@@ -7,7 +7,7 @@ var auth = require('../auth.service');
 var router = express.Router();
 
 router.post('/', function (req, res, next) {  
-  var errprMsg;
+  var errorMsg;
   if (req.body.email === '' || req.body.password === '') {
     errorMsg = "用户名和密码不能为空";
   }

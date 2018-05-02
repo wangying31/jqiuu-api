@@ -1,9 +1,9 @@
-var express = reuqire('express');
+var express = require('express');
 var controller = require('./user.controller');
 var expressJwt = require('express-jwt');
 var config = require('../../config');
 
-var router = express.router();
+var router = express.Router();
 
 router.post('/addUser', controller.addUser);
 router.get('/authInfo', expressJwt({secret: config.session.secrets}, controller.authInfo));
