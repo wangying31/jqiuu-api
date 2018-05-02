@@ -19,7 +19,7 @@ fs.readdirSync(modelsPath).forEach(function (file) {
  var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
  var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
 
- var app = exprss();
+ var app = express();
 
  app.set('port', process.env.PORT || 3000);
 

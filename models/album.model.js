@@ -12,7 +12,7 @@ var AlbumSchema = new Schema({
   likeCount: {type: Number, default: 0},
   likeToady: [{
     userIp: String,
-    date: {type: date, default: Date.now}
+    date: {type: Date, default: Date.now}
   }],
   status: {type: Number, default: 1},
   created: {type: Date, default: Date.now}
