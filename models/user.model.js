@@ -113,7 +113,7 @@ userSchema.path('nickname').validate(function(value, respond){
 
 userSchema.path('email').validate(function(value, respond) {
   var self = this;
-  this.constructor.findOne({email: value}, function (err, uesr) { 
+  this.constructor.findOne({email: value}, function (err, user) { 
     if (err) {
       return err;
     }
@@ -134,7 +134,7 @@ userSchema.methods = {
     return (selfRoles.indexOf('admin') !== -1 || selfRoles.indexOf(role) !== -1);
   },
   // 验证密码
-  authenticate: function (plainText) { 
+  authenticate: function(plainText) {
     return this.encryptPassword(plainText) === this.hashedPassword;
   },
   // 生成验证码
@@ -147,7 +147,7 @@ userSchema.methods = {
       return '';
     }
     var salt = new Buffer(this.salt, 'base64');
-    return crypto.pbkdf2Sync(password, salt, 10000, 64, 'shal').toString('base64');
+    return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha1').toString('base64');
   }
 };
 
