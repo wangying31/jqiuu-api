@@ -154,7 +154,6 @@ userSchema.methods = {
 userSchema.set('toObject', {virtuals: true});
 
 var User = mongoose.model('User', userSchema);
-
 var Promise = require('bluebird');
 Promise.promisifyAll(User);
 Promise.promisifyAll(User.prototype);
