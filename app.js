@@ -6,7 +6,7 @@ var morgan = require('morgan');
 var bodyParser = require('body-parser');
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/jqiugb');
+mongoose.connect('mongodb://localhost/jqiudb');
 var modelsPath = path.join(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(function (file) { 
   if (/(.*)\.(js$|coffee$)/.test(file)) {
@@ -28,6 +28,8 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 
  app.use(morgan('dev'));
  app.use(morgan({stream: accessLog}));
+
+ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
  app.use('/public/', express.static(path.join(__dirname, 'public')));
 

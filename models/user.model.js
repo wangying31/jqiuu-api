@@ -77,7 +77,8 @@ userSchema.virtual('authInfo').get(function () {
     'summary':this.summary,
     'url': this.url,
     'qqnumber': this.qqnumber,
-    'created': this.created
+    'created': this.created,
+    'role': this.role
    };
 });
 

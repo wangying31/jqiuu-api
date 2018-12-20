@@ -30,7 +30,6 @@ exports.addPhoto = function (req, res) {
 			var urlPath = path.replace(/\\/g, '/');
 			var photoPath = urlPath.substr(urlPath.lastIndexOf('/'), urlPath.length);
 			var url = config.root + '/public/uploads/album' + photoPath;
-
 			imageMagick(urlPath).resize(350, null)
 				.write(__dirname + '/../../public/uploads/thumbnail' + photoPath, function (err) {
 					if (err) {
@@ -149,25 +148,31 @@ exports.photoLike = function (req, res) {
 	};
 	Album.findByIdAsync(pid).then(function (photo) {  
 		var isLiked = _.findIndex(photo.likeToday, {userIp: ip});
+		console.log(isLiked !== -1);
+		console.log(photo);
 		if(isLiked !== -1 && getToday(photo.likeToady[isLiked].date)) {
 			throw new Error();
 		}else if(isLiked !== -1){
 			photo.likeCount += 1;
 			photo.likeToady[isLiked].date = new Date();
 		}else{
+			console.log('33333');
 			photo.likeCount += 1;
 			photo.likeToady.push({
 				userIp: ip,
 				date: new Date()
 			})
+			console.log(photo);
 		}
-		return photo.saveAsync();
+		return photo.saveAsync()
 	}).then(function (photo) {
+		console.log('4');
 		return res.status(200).send({
 			pid: photo._id,
 			likeCount: photo.likeCount
 		});
 	}).catch(function (err) {
+		console.log('5');
 		return res.status(401).send({errorMsg: '今天已经点过赞啦'});
 	});
 }

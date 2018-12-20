@@ -16,7 +16,13 @@ exports.addArticle = function (req, res) {
   var weather = req.body.weather.trim();
   var image = req.body.image;
   var status = req.body.status;
+  var id = req.user.id;
   var errorMsg;
+  User.findByIdAsync(id).then(function(user){
+    if (user.role !== 'admin') {
+      return res.status(401).send({errorMsg:'没有权限操作!'});
+    }
+  })
   if(!title){
     errorMsg = '标题不能为空';
   }else if(title.length>10){
@@ -32,7 +38,7 @@ exports.addArticle = function (req, res) {
     return res.status(401).send({errorMsg:errorMsg});
   }
   var data = {
-    authId: req.user.id,
+    authId: id,
     title: title,
     weather: weather,
     content: content,
@@ -60,7 +66,11 @@ exports.upload = function (req, res) {
     if (err) {
       throw err;
     }
-    var img = files.wangEditorH5File;
+    var img = {};
+    for (item in files) {
+      img = files[item]
+    }
+    // var img = files.wangEditorH5File;
       var path = img.path;
       var type = img.type.split('/')[0];
       if (img.size > 1024*1024) {
@@ -74,6 +84,7 @@ exports.upload = function (req, res) {
         });
       } else {
         var urlPath = path.replace(/\\/g, '/');
+        console.log(urlPath);
         var url = config.root + '/public/uploads/article' + urlPath.substr(urlPath.lastIndexOf('/'), urlPath.length);
         imageMagick(urlPath).size(function (err, size) {  
           if (!err)
@@ -88,10 +99,15 @@ exports.upload = function (req, res) {
           imageMagick(urlPath).resize(width, height)
             .crop(150, 150, cropWidth ,cropHeight )
             .write( __dirname + '/../../public/uploads/thumbnail' + urlPath.substr(urlPath.lastIndexOf('/'), urlPath.length), function (err) {
-                if (err) {
+              var imgList = {};
+              if (err) {
+                console.log(err);
                     return res.status(401).send('error|上传图片失败');
                 }
-                res.status(200).send(url);
+                imgList['errno'] = 0;// errno 即错误代码，0 表示没有错误
+                imgList['data'] = [url]; // data 是一个数组，返回若干图片的线上地址
+                // res.status(200).send(url);
+                res.status(200).send(imgList);
             });
         });
       }
@@ -247,7 +263,7 @@ exports.articleCollect = function (req, res) {
   var aid = req.params.id;
   var id = req.user.id;
   var conditionUser, conditionArticl, collected;
-  User.findByIdAsync(id),then(function (user) {  
+  User.findByIdAsync(id).then(function (user) {  
     var isCollect = _.findIndex(user.collectList, function(item) {
       return item.toString() == aid;
     });
@@ -319,7 +335,7 @@ exports.articleStatus = function (req, res) {
   var aid = req.params.id;
   var id = req.user.id;
   Article.findByIdAsync(aid).then(function (article) {  
-    if (id !== article.authId) {
+    if (id != article.authId) {// article.authId 类型为object  得用 == 大坑
       throw new Error();
     }
     if (article.status === 0) {
@@ -341,7 +357,7 @@ exports.delArticle = function (req, res) {
   var id = req.user.id;
   var aid = req.params.id;
   Article.findByIdAsync(aid).then(function (article) {  
-    if (article.authId !== id) throw new Error();
+    if (article.authId != id) throw new Error();
     return Article.findByIdAndRemoveAsync(aid);
   }).then(function () {  
     return Comment.removeAsync({aid: aid});

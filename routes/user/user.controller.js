@@ -56,6 +56,7 @@ exports.addUser = function (req, res) {
 };
 
 exports.authInfo = function (req,res) {
+	console.log('================================');
 	var id = req.user.id;
 	var data;
 	User.findByIdAsync(id).then(function (user) {
