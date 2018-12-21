@@ -10,6 +10,7 @@ var CommentSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref:'User'
 	},
+	uid:String,
 	content:String,
 	status:{ type :Number, default:1 },
 	created: { type: Date, default: Date.now },

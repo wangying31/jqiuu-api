@@ -22,19 +22,31 @@ exports.addComment = function (req,res) {
 	var data = {
 		aid: aid,
 		content: content,
-		userId: userId
+		userId: userId,
+		uid: userId
 	};
-	Comment.createAsync(data).then(function (comment) {
-			sendComment = comment;
-			return Article.findByIdAndUpdateAsync(aid,{ $inc:{commentCount:1}},{new:true});
+	Comment.find({'uid':userId}).sort({'created':-1}).limit(1).then(function (comment) {
+		if (comment) {
+			var comm = comment[0] || {}, timeout = 60000;// 一分钟评论一次
+			if (+new Date() - (+new Date(comm.created)) < timeout) {
+				// return res.status(401).send({errorMsg:'评论过于频繁!'});
+				errorMsg = '评论过于频繁!';
+				throw err;
+			}
+		}
+		return Comment.createAsync(data)
+	}).then(function (comment) {
+		sendComment = comment;
+		return Article.findByIdAndUpdateAsync(aid,{ $inc:{commentCount:1}},{new:true});
 	}).then(function (article) {
 		return res.status(200).send({
 			comment: sendComment,
 			commentCount: article.commentCount
 		});
 	}).catch(function (err) {
-		return res.status(401).send();
-	})
+		return res.status(401).send({errorMsg:errorMsg});
+	});
+
 };
 
 exports.commentList = function (req,res) {

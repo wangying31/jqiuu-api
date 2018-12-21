@@ -10,7 +10,16 @@ var	formidable = require('formidable');
 var _ = require('lodash');
 var config = require('../../config');
 
+var getIP = function (req) { 
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || '';
+	if(ip.split(',').length>0){
+		ip = ip.split(',')[0]
+	};
+	return ip;
+};
+
 exports.addUser = function (req, res) {
+	var ip = getIP(req);
   var nickname = req.body.nickname ? req.body.nickname.replace(/(^\s+)|(\s+$)/g, "") : '';
 	var email = req.body.email ? req.body.email.replace(/(^\s+)|(\s+$)/g, "") : '';
 	var password = req.body.password;
@@ -38,6 +47,7 @@ exports.addUser = function (req, res) {
 
 	var newUser = new User(req.body);
 	newUser.role = 'user';
+	newUser.ip = ip;
 
 	newUser.saveAsync().then(function (user) {
 		var token = auth.signToken(user._id);
@@ -50,6 +60,9 @@ exports.addUser = function (req, res) {
 		}
 		if (err.errors && err.errors.email) {
 			err = {errorMsg: err.errors.email.message}
+		}
+		if (err.errors && err.errors.ip) {
+			err = {errorMsg: err.errors.ip.message}
 		}
 		return res.status(401).send(err);
 	});

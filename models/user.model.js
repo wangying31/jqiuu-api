@@ -35,6 +35,7 @@ var userSchema = new Schema({
   summary: String,
   url: String,
   qqnumber: String,
+  ip:String,
   collectList: [{
     type: Schema.Types.ObjectId,
     ref: 'Article'
@@ -127,6 +128,22 @@ userSchema.path('email').validate(function(value, respond) {
     respond(true);
     })
 },'邮箱已被占用');
+
+userSchema.path('ip').validate(function(value, respond) { 
+  var self = this;
+  this.constructor.findOne({ip: value}, function (err, user) { 
+    if (err) {
+      return err;
+    }
+    if (user) {
+      if (self.id === user.id) {
+        return respond(true);
+      }
+      return respond(false);
+    };
+    respond(true);
+    })
+},'请勿多次注册!');
 
 userSchema.methods = {
   // 检查用户权限

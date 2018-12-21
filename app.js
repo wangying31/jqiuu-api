@@ -35,7 +35,7 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 
  routes(app);
 
- app.listen(app.get('port'), function () { 
+ app.listen(app.get('port'), '0.0.0.0', function () { 
    console.log('Express server listening on port ' + app.get('port'));
   });
 
