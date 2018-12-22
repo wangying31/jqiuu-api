@@ -39,7 +39,8 @@ exports.addPhoto = function (req, res) {
 					var data = {
 						userId: req.user.id,
 						photo: url,
-						thumbnail: thumbnailUrl
+						thumbnail: thumbnailUrl,
+						likeCount: Math.ceil(Math.random()*50 + 10)
 					};
 					Album.createAsync(data).then(function (photo) {
 						return res.status(200).send({
@@ -144,35 +145,29 @@ exports.photoLike = function (req, res) {
 	var getToday = function (value) {
 		var date = new Date(value);
 		var dateToday = new Date();
-		return date.getFullYear() === dateToday.getFullYear && date.getMonth() === dateToday.getMonth() && date.getDate() === dateToday.getDate();
+		return date.getFullYear() === dateToday.getFullYear() && date.getMonth() === dateToday.getMonth() && date.getDate() === dateToday.getDate();
 	};
 	Album.findByIdAsync(pid).then(function (photo) {  
-		var isLiked = _.findIndex(photo.likeToday, {userIp: ip});
-		console.log(isLiked !== -1);
-		console.log(photo);
-		if(isLiked !== -1 && getToday(photo.likeToady[isLiked].date)) {
+		var isLiked = _.findIndex(photo.likeToday, {'userIp': ip});
+		if(isLiked !== -1 && getToday(photo.likeToday[isLiked].date)) {
 			throw new Error();
 		}else if(isLiked !== -1){
 			photo.likeCount += 1;
-			photo.likeToady[isLiked].date = new Date();
+			photo.likeToday[isLiked].date = new Date();
 		}else{
-			console.log('33333');
 			photo.likeCount += 1;
-			photo.likeToady.push({
+			photo.likeToday.push({
 				userIp: ip,
 				date: new Date()
 			})
-			console.log(photo);
 		}
 		return photo.saveAsync()
 	}).then(function (photo) {
-		console.log('4');
 		return res.status(200).send({
 			pid: photo._id,
 			likeCount: photo.likeCount
 		});
 	}).catch(function (err) {
-		console.log('5');
 		return res.status(401).send({errorMsg: '今天已经点过赞啦'});
 	});
 }

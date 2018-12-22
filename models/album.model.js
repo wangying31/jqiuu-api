@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+mongoose.plugin(schema => { schema.options.usePushEach = true });// mongo 3.4以后不支持$pushAll等,做兼容处理
 var Schema = mongoose.Schema;
 
 var AlbumSchema = new Schema({
@@ -10,7 +11,7 @@ var AlbumSchema = new Schema({
   thumbnail: String,
   name: String,
   likeCount: {type: Number, default: 0},
-  likeToady: [{
+  likeToday: [{
     userIp: String,
     date: {type: Date, default: Date.now}
   }],

@@ -10,10 +10,10 @@ var _ = require('lodash');
 var config = require('../../config');
 
 exports.addArticle = function (req, res) {  
-  var title = req.body.title.trim();
+  var title = req.body.title;
   var content = req.body.content;
-  var tag = req.body.tag.trim();
-  var weather = req.body.weather.trim();
+  var tag = req.body.tag;
+  var weather = req.body.weather;
   var image = req.body.image;
   var status = req.body.status;
   var id = req.user.id;
@@ -43,7 +43,8 @@ exports.addArticle = function (req, res) {
     weather: weather,
     content: content,
     tag: tag,
-    status: status
+    status: status,
+    pv: Math.ceil(Math.random()*50 + 30)
   };
 
   if(image && (image.substr(0, config.root.length) == config.root)) {
@@ -299,7 +300,9 @@ exports.editArticle = function (req,res) {
   var errorMsg;
   if(title) title = title.trim();
   if(weather) weather = weather.trim();
-  if(title && title.length > 10){
+  if(!title){
+    errorMsg = '标题不能为空';
+  }else if(title && title.length > 10){
     errorMsg = '标题过长';
   }else if(!content){
     errorMsg = '内容不能为空';
