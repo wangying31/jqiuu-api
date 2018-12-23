@@ -3,7 +3,7 @@ var config = {
     secrets: 'salt'
   },
   root: 'http://localhost:3000'
-  //root: 'http://'
+  // root: 'http://www.jqiuu.com'
 };
 
 module.exports = config;
