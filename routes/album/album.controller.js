@@ -20,11 +20,11 @@ exports.addPhoto = function (req, res) {
     var type = img.type.split('/')[0];
     if(img.size > 1024*1024) {
 			fs.unlink(path, function () {
-				return res.send({errorMsg: '图片超出最大限制'});
+				return res.status(401).send({errorMsg: '图片超出最大限制'});
 			});
 		}else if(type != 'image' && type != 'application'){
 			fs.unlink(path, function() {
-				return res.send({errorMsg: '图片不合法'});
+				return res.status(401).send({errorMsg: '图片不合法'});
 			});
 		}else {
 			var urlPath = path.replace(/\\/g, '/');
@@ -33,7 +33,7 @@ exports.addPhoto = function (req, res) {
 			imageMagick(urlPath).resize(350, null)
 				.write(__dirname + '/../../public/uploads/thumbnail' + photoPath, function (err) {
 					if (err) {
-						return res.send({errorMsg: '上传图片失败'});
+						return res.status(401).send({errorMsg: '上传图片失败'});
 					}
 					var thumbnailUrl = config.root + '/public/uploads/thumbnail' + photoPath;
 					var data = {
