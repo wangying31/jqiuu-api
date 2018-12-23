@@ -8,7 +8,6 @@ var auth = require('../auth/auth.service');
 var fs = require('fs');
 var	formidable = require('formidable');
 var _ = require('lodash');
-var config = require('../../config');
 
 var getIP = function (req) { 
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || '';
