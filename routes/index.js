@@ -16,6 +16,7 @@ module.exports = function (app) {
    app.use('/article', require('./article/index'));
    app.use('/comment', require('./comment/index'));
    app.use('/album', require('./album/index'));
+   app.use('/websites', require('./websites/index'));
 
    app.use('/*', function (req, res, next) { 
      return res.json({status:'success', data:'八两代码'});

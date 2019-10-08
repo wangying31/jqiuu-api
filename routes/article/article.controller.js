@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var markdown = require('markdown').markdown;
 var Article = mongoose.model('Article');
 var User = mongoose.model('User');
 var Comment = mongoose.model('Comment');
@@ -41,12 +42,12 @@ exports.addArticle = function (req, res) {
     authId: id,
     title: title,
     weather: weather,
-    content: content,
+    content:  markdown.toHTML(content),
     tag: tag,
     status: status,
     pv: Math.ceil(Math.random()*50 + 30)
   };
-
+console.log(data);
   if(image && (image.substr(0, config.root.length) == config.root)) {
     data.image = config.root + '/public/uploads/thumbnail' + image.substr(image.lastIndexOf('/'), image.length);
   }
