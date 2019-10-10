@@ -150,9 +150,11 @@ exports.delWebsites = function (req, res) {
   });
 };
 
-exports.websiteLike = function (req, res) {  
+exports.websiteLikeNum = function (req, res) {  
 	var wid = req.params.id;
-	var ip = req.ip;
+  var ip = req.ip;
+  console.log('========ip=======' + ip);
+  console.log('========id=======' + wid);
 	var getToday = function (value) {
 		var date = new Date(value);
 		var dateToday = new Date();
@@ -163,10 +165,10 @@ exports.websiteLike = function (req, res) {
 		if(isLiked !== -1 && getToday(website.likeToday[isLiked].date)) {
 			throw new Error();
 		}else if(isLiked !== -1){
-			website.likeCount += 1;
+			website.likeNum += 1;
 			website.likeToday[isLiked].date = new Date();
 		}else{
-			website.likeCount += 1;
+			website.likeNum += 1;
 			website.likeToday.push({
 				userIp: ip,
 				date: new Date()
@@ -176,9 +178,24 @@ exports.websiteLike = function (req, res) {
 	}).then(function (website) {
 		return res.status(200).send({
 			wid: website._id,
-			likeCount: website.likeCount
+			likeNum: website.likeNum
 		});
 	}).catch(function (err) {
 		return res.status(401).send({errorMsg: '今天已经点过赞啦'});
+	});
+};
+
+exports.websitebrowseNum = function (req, res) {  
+  var wid = req.params.id;
+	Websites.findByIdAsync(wid).then(function (website) {  
+    website.browseNum += 1;
+		return website.saveAsync()
+	}).then(function (website) {
+		return res.status(200).send({
+			wid: website._id,
+			browseNum: website.browseNum
+		});
+	}).catch(function (err) {
+		return res.status(401).send({errorMsg: '异常'});
 	});
 }
