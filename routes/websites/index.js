@@ -12,5 +12,6 @@ router.put('/:id/editWebsites', expressJwt({secret: config.session.secrets}), co
 router.delete('/:id', expressJwt({secret: config.session.secrets}), controller.delWebsites);
 router.put('/:id/websiteLikeNum', controller.websiteLikeNum);
 router.put('/:id/websitebrowseNum', controller.websitebrowseNum);
+router.get('/types', controller.types);
 
 module.exports = router;

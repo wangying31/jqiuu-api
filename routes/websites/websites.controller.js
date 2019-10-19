@@ -132,7 +132,7 @@ exports.editWebsites = function (req,res) {
   })
 };
 
-exports.delWebsites = function (req, res) {  
+exports.delWebsites = function (req, res) {
   var id = req.user.id;
   var wid = req.params.id;
   User.findByIdAsync(id).then(function(user) {
@@ -199,3 +199,13 @@ exports.websitebrowseNum = function (req, res) {
 		return res.status(401).send({errorMsg: '异常'});
 	});
 }
+
+exports.types = function(req, res){
+  Websites.distinctAsync('type').then(function (types) {  
+    return res.status(200).send({
+      types: types
+    }); 
+  }).catch(function (err) {  
+    return res.status(401).send();
+  });
+};
