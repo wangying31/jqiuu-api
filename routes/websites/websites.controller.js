@@ -89,8 +89,9 @@ exports.findById = function (req, res) {
 };
 
 exports.editWebsites = function (req,res) {
+  console.log(req)
   var reqs = req.body, errorMsg = '';
-  var wid = req.params.id;
+  var wid = reqs.wid;
   var title = reqs.title;
   var icon = reqs.icon;
   var type = reqs.type;
@@ -120,6 +121,7 @@ exports.editWebsites = function (req,res) {
   })
 
   Websites.findByIdAsync(wid).then(function (websites) {
+    console.log(req.body)
     _.assign(websites, req.body);
     websites.updated = new Date();
     return websites.saveAsync()
